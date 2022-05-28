@@ -6,19 +6,17 @@ from torch.utils.data import Dataset
 from torch.utils.tensorboard import SummaryWriter
 import ssl
 import os
+import pandas as pd
 ssl._create_default_https_context = ssl._create_unverified_context
 
 class MyDataset(Dataset):    #继承Datasets
-    def __init__(self,path):    # 初始化一些用到的参数，一般不仅有self
+    def __init__(self,path,sentiment):    # 初始化一些用到的参数，一般不仅有self
         target=[]
         path1=[]
         for i in os.listdir(path):
-            tdir=os.path.join(path,i)
-            tLen=len(os.listdir(tdir))
-            for j in range(tLen):
-                target.append(int(i))
-            for j in os.listdir(tdir):
-                path1.append(os.path.join(tdir,j))
+            path1.append(os.path.join(path,i))
+            num=(int)(i.strip(".npy"))
+            target.append(sentiment[num]-1)
         self.target=target
         self.path=path1
     def __len__(self):    # 数据集的长度
@@ -27,12 +25,12 @@ class MyDataset(Dataset):    #继承Datasets
         target = self.target[idx]
         x = np.load(self.path[idx], allow_pickle=True)
         return x ,target
-device = 'cuda'
-path=r"C:\Users\86131\Desktop\data\wav2vecOut"
-batch_size=128
-
-trainData=MyDataset(os.path.join(path,"train"))
-testData=MyDataset(os.path.join(path,"val"))
+device = 'cpu'
+batch_size=32
+total = pd.read_csv(r'C:\Users\86131\Desktop\twitter-sentiment-analysis-self-driving-cars\train.csv')
+sentiment = total['sentiment']
+trainData=MyDataset("textTrainData",sentiment)
+testData=MyDataset("textValData",sentiment)
 
 trainLen=len(trainData)
 testLen=len(testData)
@@ -52,6 +50,7 @@ class LSTM(nn.Module):
             nn.Linear(hidden_dim,output_dim),
             nn.Sigmoid()
         )
+        self.fc1=nn.Linear(hidden_dim,1)
 
     def forward(self, x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).requires_grad_().to(device)
@@ -60,10 +59,10 @@ class LSTM(nn.Module):
         out.to(device)
         return self.decoder(out)
 
-input_dim = 512
-hidden_dim = 30
+input_dim = 768
+hidden_dim = 20
 num_layers = 1
-output_dim = 2
+output_dim = 5
 
 newModel =LSTM(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers)
 newModel=newModel.to(device)
@@ -74,7 +73,7 @@ theLoss=theLoss.to(device)
 lr=1e-3
 optim =torch.optim.Adam(newModel.parameters(), lr=lr)
 
-epoch=100
+epoch=120
 write =SummaryWriter("./log")
 theStep=0
 for i in range(epoch):
@@ -87,14 +86,13 @@ for i in range(epoch):
     newModel.train()
     for data in trainDataLoader:
         wav,flag=data
-        wav=wav.reshape(-1,1,512)
-        flag=flag.reshape(-1)
+        flag = flag.reshape(-1)
+        wav=wav.reshape(-1,1,768)
         wav=wav.to(device)
         flag=flag.to(device)
         output=newModel(wav)
-        output=output.reshape(batch_size,-1)
+        output = output.reshape(batch_size, -1)
         loss=theLoss(output,flag)
-        acc += (output.argmax(1) == flag).sum().detach().squeeze().t().cpu().numpy()
         optim.zero_grad()
         loss.backward()
         optim.step()
@@ -104,7 +102,7 @@ for i in range(epoch):
         with torch.no_grad():
             wav,flag=data
             flag=flag.reshape(-1)
-            wav = wav.reshape(-1, 1, 512)
+            wav = wav.reshape(-1, 1, 768)
             flag=torch.tensor(flag)
             wav=wav.to(device)
             flag=flag.to(device)
