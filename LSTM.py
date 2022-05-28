@@ -59,7 +59,7 @@ class LSTM(nn.Module):
         out.to(device)
         return self.decoder(out)
 
-input_dim = 768
+input_dim = 1024
 hidden_dim = 20
 num_layers = 1
 output_dim = 5
@@ -87,7 +87,7 @@ for i in range(epoch):
     for data in trainDataLoader:
         wav,flag=data
         flag = flag.reshape(-1)
-        wav=wav.reshape(-1,1,768)
+        wav=wav.reshape(-1,1,input_dim)
         wav=wav.to(device)
         flag=flag.to(device)
         output=newModel(wav)
@@ -102,7 +102,7 @@ for i in range(epoch):
         with torch.no_grad():
             wav,flag=data
             flag=flag.reshape(-1)
-            wav = wav.reshape(-1, 1, 768)
+            wav = wav.reshape(-1, 1, input_dim)
             flag=torch.tensor(flag)
             wav=wav.to(device)
             flag=flag.to(device)
