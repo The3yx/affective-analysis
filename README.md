@@ -3,6 +3,13 @@
 
 处理数据就还是变成csv存起来
 
+
+预训练模型在https://huggingface.co/下载
+
+git clone https://huggingface.co/bert-large-uncased
+
+下载方式如上所示
+
 预训练请都使用larget和英文的模型
 
 预训练需要输出两个数据，一个是取平均的，一个是不取平均的存储格式如下，不取平均的需要输出特征的最大值，特征维度也需要告诉下一级（可以看bert的代码）
