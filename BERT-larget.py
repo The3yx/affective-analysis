@@ -11,8 +11,8 @@ import os
 from torch import nn
 ssl._create_default_https_context = ssl._create_unverified_context
 
-tokenizer = BertTokenizer.from_pretrained(r'C:\Users\86131\PycharmProjects\torch1\bert-base-chinese', do_lower_case=True)
-bert = BertModel.from_pretrained(r'C:\Users\86131\PycharmProjects\torch1\bert-base-chinese')
+tokenizer = BertTokenizer.from_pretrained(r'C:\Users\86131\PycharmProjects\torch1\bert-large-uncased', do_lower_case=True)
+bert = BertModel.from_pretrained(r'C:\Users\86131\PycharmProjects\torch1\bert-large-uncased')
 bert.eval()
 
 # text = '我爱北京天安门。'
@@ -28,6 +28,7 @@ bert.eval()
 # text_embedding = bert(text_id)[0][0]  # 取第1层，也可以取别的层。
 # text_embedding = text_embedding.detach()  # 切断反向传播。
 # print(text_embedding.shape)  # torch.Size([1, 8, 768])
+
 
 
 device = 'cuda' #读取数据
@@ -64,7 +65,7 @@ for i in range(lenth):
         output = bert(text_id)[0]
         text_embedding = bert(text_id)[0][0]  # 取第1层，也可以取别的层。
         text_embedding = text_embedding.detach().squeeze().t().cpu().numpy()  # 切断反向传播。# torch.Size([1, 8, 768])
-        text_embedding=text_embedding.reshape(-1,768)
+        text_embedding=text_embedding.reshape(-1,1024) #后面这个768需要告诉下一层
         feature =text_embedding
         if not mask:
             feature = np.mean(text_embedding, 0)
