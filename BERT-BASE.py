@@ -29,12 +29,14 @@ bert.eval()
 # print(text_embedding.shape)  # torch.Size([1, 8, 768])
 
 
-device = 'cuda'
+device = 'cuda' #读取数据
 total = pd.read_csv(r'C:\Users\86131\Desktop\twitter-sentiment-analysis-self-driving-cars\train.csv')
 sentiment = total['sentiment']
 texts = total['text']
 lenth = len(texts)
 h=0
+maxlen=0
+mask=True #设置是否使用mask，即是否取平均
 for i in range(lenth):
     # target = torch.tensor(int(sentiment[i])).reshape(1)
     text=texts[i]
@@ -47,13 +49,25 @@ for i in range(lenth):
         text_embedding = bert(text_id)[0][0]  # 取第1层，也可以取别的层。
         text_embedding = text_embedding.detach().squeeze().t().cpu().numpy()  # 切断反向传播。# torch.Size([1, 8, 768])
         text_embedding=text_embedding.reshape(-1,768)
-        feature = np.mean(text_embedding, 0)
-        if h==4:
-            h=0
-            np.save("./textValData/{}.npy".format(i), feature, allow_pickle=True)
+        if not mask:
+            feature = np.mean(text_embedding, 0)
+        if feature.shape[0]>maxlen:
+            maxlen=feature.shape[0]
+        if mask:
+            if h==4:
+                h=0
+                np.save("./maskValData/{}.npy".format(i), feature, allow_pickle=True)
+            else:
+                h+=1
+                np.save("./maskTrainData/{}.npy".format(i), feature, allow_pickle=True)
         else:
-            h+=1
-            np.save("./textTrainData/{}.npy".format(i), feature, allow_pickle=True)
+            if h==4:
+                h=0
+                np.save("./ValData/{}.npy".format(i), feature, allow_pickle=True)
+            else:
+                h+=1
+                np.save("./TrainData/{}.npy".format(i), feature, allow_pickle=True)
+print(maxlen)
         # np.save("./textValData/f{}.npy".format(i),target, allow_pickle=True)
         # flag.append(target.numpy())
         # z1.append(z_feature)
