@@ -7,6 +7,7 @@ import numpy as np
 from fairseq.models.wav2vec import Wav2VecModel #fairseq.__version__ = 0.10.1
 import pandas as pd
 import ssl
+import os
 from torch import nn
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -36,7 +37,20 @@ texts = total['text']
 lenth = len(texts)
 h=0
 maxlen=0
-mask=True #设置是否使用mask，即是否取平均
+filename="text"
+mask=False #设置是否使用mask，即是否取平均
+if mask:
+    try:
+        os.makedirs("./mask" + filename + "ValData")
+        os.makedirs("./mask" + filename + "TrainData")
+    except FileExistsError:
+        pass
+else:
+    try:
+        os.makedirs("./" + filename + "ValData")
+        os.makedirs("./" + filename + "TrainData")
+    except FileExistsError:
+        pass
 for i in range(lenth):
     # target = torch.tensor(int(sentiment[i])).reshape(1)
     text=texts[i]
@@ -49,6 +63,7 @@ for i in range(lenth):
         text_embedding = bert(text_id)[0][0]  # 取第1层，也可以取别的层。
         text_embedding = text_embedding.detach().squeeze().t().cpu().numpy()  # 切断反向传播。# torch.Size([1, 8, 768])
         text_embedding=text_embedding.reshape(-1,768)
+        feature =text_embedding
         if not mask:
             feature = np.mean(text_embedding, 0)
         if feature.shape[0]>maxlen:
@@ -56,17 +71,17 @@ for i in range(lenth):
         if mask:
             if h==4:
                 h=0
-                np.save("./maskValData/{}.npy".format(i), feature, allow_pickle=True)
+                np.save("./mask"+filename+"ValData/{}.npy".format(i), feature, allow_pickle=True)
             else:
                 h+=1
-                np.save("./maskTrainData/{}.npy".format(i), feature, allow_pickle=True)
+                np.save("./mask"+filename+"TrainData/{}.npy".format(i), feature, allow_pickle=True)
         else:
             if h==4:
                 h=0
-                np.save("./ValData/{}.npy".format(i), feature, allow_pickle=True)
+                np.save("./"+filename+"ValData/{}.npy".format(i), feature, allow_pickle=True)
             else:
                 h+=1
-                np.save("./TrainData/{}.npy".format(i), feature, allow_pickle=True)
+                np.save("./"+filename+"TrainData/{}.npy".format(i), feature, allow_pickle=True)
 print(maxlen)
         # np.save("./textValData/f{}.npy".format(i),target, allow_pickle=True)
         # flag.append(target.numpy())
