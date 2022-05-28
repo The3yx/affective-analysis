@@ -44,12 +44,14 @@ if mask:
         os.makedirs("./mask" + filename + "ValData")
         os.makedirs("./mask" + filename + "TrainData")
     except FileExistsError:
+        print("文件夹已存在")
         pass
 else:
     try:
         os.makedirs("./" + filename + "ValData")
         os.makedirs("./" + filename + "TrainData")
     except FileExistsError:
+        print("文件夹已存在")
         pass
 for i in range(lenth):
     # target = torch.tensor(int(sentiment[i])).reshape(1)
