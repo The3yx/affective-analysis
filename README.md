@@ -1,8 +1,8 @@
 # affective-analysis
+
 2022BUPT机器学习大作业
 
 处理数据就还是变成csv存起来
-
 
 预训练模型在https://huggingface.co/下载
 
@@ -20,7 +20,6 @@ git clone https://huggingface.co/bert-large-uncased
 
 transform就在lstm的代码上改就可以了吧，换掉model其他部分应该不用改，mask可以直接迁移过去，可能要调整一下维度的位置（比如时间维度在第一个或第二个之类的）
 
-
 模型思路的话没啥思路吧，之前这么做都是比较好的
 
 因为数据太少希望可以数据增强获得更多的数据，处理杂音就肯定需要的（处理错误标签？）
@@ -30,3 +29,10 @@ transform就在lstm的代码上改就可以了吧，换掉model其他部分应�
 预训练之后需要对时序信息再进行一波处理，rnn，lstm，transformer都是可以的选择，一般来说后两者比较好，所以这里使用了后两者
 
 mask的使用是因为输入的大小不同，可以取平均或者mask
+
+
+数据不平衡：60%的3
+解决方案：
+
+1. 数据增强其他类型
+2. [(30条消息) 视觉分类任务中处理不平衡问题的loss比较_Daniel2333的博客-CSDN博客](https://blog.csdn.net/weixin_35653315/article/details/78327408)
