@@ -9,15 +9,28 @@ import ssl
 import torch.nn.functional as F
 import os
 ssl._create_default_https_context = ssl._create_unverified_context
-
+sumNum=942
+device = 'cuda:5'
+input_dim = 1024
+hidden_dim = 20
+num_layers = 1
+output_dim = 5
+lr=1e-3
+batch_size=128
+trainPath="masktextTrainData"
+valPath="masktextValData"
+maxLen=86 #按照之前设置求的maxlen进行设置进行分类 77
 class MyDataset(Dataset):    #继承Datasets
-    def __init__(self,path,sentiment,maxLen):    # 初始化一些用到的参数，一般不仅有self
+    def __init__(self,path,sentiment,sentiment1,maxLen):    # 初始化一些用到的参数，一般不仅有self
         target=[]
         path1=[]
         for i in os.listdir(path):
             path1.append(os.path.join(path,i))
             num=(int)(i.strip(".npy"))
-            target.append(sentiment[num]-1)
+            if num<sumNum:
+                target.append(sentiment[num]-1)
+            else:
+                target.append(sentiment1[num-sumNum]-1)
         self.target=target
         self.path=path1
         self.maxLen=maxLen
@@ -35,18 +48,17 @@ class MyDataset(Dataset):    #继承Datasets
         if x.shape[0]<self.maxLen:
             x=np.concatenate([x, np.zeros((self.maxLen-x.shape[0],(int)(x.shape[1])),'f')], axis=0)
         return x ,target,mask
-device = 'cuda'
-maxLen=77 #按照之前设置求的maxlen进行设置进行分类
-total = pd.read_csv(r'C:\Users\86131\Desktop\twitter-sentiment-analysis-self-driving-cars\train.csv')
+total = pd.read_csv('/data6/hupeng/data/twitter-sentiment-analysis-self-driving-cars/train.csv')
+total1 = pd.read_csv('/data6/hupeng/data/twitter-sentiment-analysis-self-driving-cars/train_pre.csv')
 sentiment = total['sentiment']
-trainData=MyDataset("masktextTrainData",sentiment,maxLen)
-testData=MyDataset("masktextValData",sentiment,maxLen)
+sentiment1 = total1['sentiment']
+trainData=MyDataset(trainPath,sentiment,sentiment1,maxLen)
+testData=MyDataset(valPath,sentiment,sentiment1,maxLen)
 
 trainLen=len(trainData)
 testLen=len(testData)
 print(trainLen)
 print(testLen)
-batch_size=128
 trainDataLoader=DataLoader(trainData,batch_size=batch_size)
 testDataLoader=DataLoader(testData,batch_size=batch_size)
 
@@ -76,10 +88,6 @@ class LSTM(nn.Module):
         out = self.decoder(attX)  # [B, label]
         return out
 
-input_dim = 768 #按照之前的维度进行设置
-hidden_dim = 20
-num_layers = 1
-output_dim = 5
 
 newModel =LSTM(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers)
 newModel=newModel.to(device)
@@ -87,7 +95,6 @@ newModel=newModel.to(device)
 theLoss=nn.CrossEntropyLoss()
 theLoss=theLoss.to(device)
 
-lr=1e-3
 optim =torch.optim.Adam(newModel.parameters(), lr=lr)
 
 epoch=100
