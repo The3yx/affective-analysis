@@ -133,7 +133,6 @@ text_col = text_col.replace(r'\w*\d\w*', '', regex=True)
 text_col = text_col.replace(r'ì|¢|‰|â||ò|¢|ã|¢|å|ü|á|û|ï|ü|ª','',regex=True)
 for word in contractions:
     text_col = text_col.replace(word, contractions[word],regex=True)
-text_col = text_col.replace('([^\s\w-]|_|)+', "", regex=True)
 text_col = text_col.replace('-', " ", regex=True)
 stop_words = set(stopwords.words('english')) - {"nor", "not", "no"} 
 stopwords_re = re.compile(r"(\s+)?\b({})\b(\s+)?".format("|".join(stop_words), re.IGNORECASE))
@@ -145,4 +144,4 @@ for num in range(len(text_col)):
     ls[num]['sentiment']=sentiment['sentiment'][num]
     ls[num]['text']=text_col[num]
 ls=pd.DataFrame(ls)
-ls.to_csv('./dataset/train_pre.csv', index=False)
+ls.to_csv('./dataset/train_pre_dot.csv', index=False)
