@@ -4,6 +4,18 @@ import torch
 from torch import nn
 import numpy as np
 
+
+
+
+
+
+#Note:
+#nn.Transformer()支持mask
+
+
+
+
+
 class PositionalEncoding(nn.Module):
     def __init__(self,
                 d_model,
