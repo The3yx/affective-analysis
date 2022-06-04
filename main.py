@@ -6,42 +6,15 @@ def TODO():
 
 def main(args):
     TODO()
-    #加载数据集
-    
+    # 加载数据集
 
+    # 初始化MODEL
 
+    # 训练
 
+    # Test
 
-
-    #初始化MODEL
-
-
-
-
-
-
-    #训练
-
-
-
-
-
-
-
-
-    #Test
-    
     return
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
