@@ -40,16 +40,21 @@ else:
 
 
 def getFeature(text):
-    text = tokenizer.tokenize(text)
-    text_id = tokenizer.convert_tokens_to_ids(text)
-    text_id = torch.tensor(text_id, dtype=torch.long)
-    text_id = text_id.unsqueeze(dim=0)
-    text_id = text_id.to(device)
-    output = model(text_id)[0]  # (1,21,1024)
+    encoded_input = tokenizer(text, return_tensors='pt').to(device)
+    print(type(encoded_input))
+    print(encoded_input)
+    output = model(**encoded_input)
+    last_hidden_states = output.last_hidden_state  # (1,23,1024)
+    # text = tokenizer.tokenize(text)
+    # text_id = tokenizer.convert_tokens_to_ids(text)
+    # text_id = torch.tensor(text_id, dtype=torch.long)
+    # text_id = text_id.unsqueeze(dim=0)
+    # text_id = text_id.to(device)
+    # output = model(text_id)[0]  # (1,21,1024)
     # print(output)
-    text_embedding = model(text_id)[0][12]  # 取第1层，也可以取别的层。
-    text_embedding = text_embedding.detach().squeeze().t().cpu().numpy()  # 切断反向传播。# torch.Size([1, 8, 768])
-    text_embedding = text_embedding.reshape(-1, 1024)  # 后面这个768需要告诉下一层
+    text_embedding = last_hidden_states[0]
+    text_embedding = text_embedding.detach().squeeze().t().cpu().numpy()  # 切断反向传播。
+    text_embedding = text_embedding.reshape(-1, 1024)
     if not mask:
         text_embedding = np.mean(text_embedding, 0)
     return text_embedding
@@ -71,21 +76,3 @@ for i in range(lenth):
         if feature.shape[0] > maxlen:
             maxlen = feature.shape[0]
         np.save(nowName, feature, allow_pickle=True)
-
-texts = total1['text']
-lenth = len(texts)
-filename = "text"
-for i in range(lenth):
-    text = texts[i]
-    with torch.no_grad():
-        nowName = "./"
-        if mask:
-            nowName += "mask"
-        nowName += filename + "TrainData/{}.npy".format(i + num)
-        if os.path.exists(nowName):
-            continue
-        feature = getFeature(text)
-        if feature.shape[0] > maxlen:
-            maxlen = feature.shape[0]
-        np.save(nowName, feature, allow_pickle=True)
-print(maxlen)
