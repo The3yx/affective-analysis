@@ -1,7 +1,9 @@
 import argparse
-from BERT_larget import BertModel
+from BERT_larget import MyBertModel
+from pytorch_pretrained_bert import BertTokenizer, BertModel
 from data import getData
 from LSTM import LSTM
+from utils import CreateFile
 
 def TODO():
     return
@@ -9,7 +11,6 @@ def TODO():
 
 def main(args):
     #获取模型等操作
-    device = 'cuda:5' #换成对应的GPU
     tokenizer = BertTokenizer.from_pretrained('./bert-large-uncased', do_lower_case=True)
     bert = BertModel.from_pretrained('./bert-large-uncased')
     bert.eval()
@@ -20,10 +21,9 @@ def main(args):
     filename="text" #部分文件名
     mask=False #设置是否使用mask，即是否取平均
     layers=False #保留所有层
-
-    bertModel = BertModel()
-    maxlen = bertModel()
-
+    CreateFile(filename)
+    bertModel = MyBertModel(myPath, bert)
+    maxlen = bertModel(filename = filename, tokenizer = tokenizer)
     # 加载数据集
     trainPath="textTrainData"
     valPath="textValData"
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_layers', type=int, default=1, help='The numbers of the layers in down stream model.')
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size.')
 
-    
+    device = 'cpu' #换成对应的GPU
     args = parser.parse_args()
 
     main(args)

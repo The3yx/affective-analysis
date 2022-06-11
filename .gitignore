@@ -1,2 +1,5 @@
 .ipynb_checkpoints
 /bert-large-uncased/*
+/__pycache__/*
+/textTrainData/*
+/textValData/*
