@@ -13,7 +13,7 @@ input_dim = 1024
 
 
 class LSTMmask(nn.Module):
-    def __init__(self, input_dim, hidden_dim, num_layers, output_dim):
+    def __init__(self, input_dim, hidden_dim, num_layers, output_dim, ceng =False):
         super(LSTM, self).__init__()
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
@@ -26,7 +26,7 @@ class LSTMmask(nn.Module):
         if ceng:
             self.w = torch.nn.Parameter(torch.FloatTensor(1,1,24), requires_grad=True)
 
-    def forward(self, x,mask):
+    def forward(self, x,mask, ceng=False):
         if ceng:
             x=torch.sum(x*self.w,dim=2)
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).requires_grad_().to(device)
@@ -51,11 +51,13 @@ class LSTM(nn.Module):
             nn.Linear(hidden_dim,output_dim),
             nn.Sigmoid()
         )
+        self.drop = nn.Dropout(0.9)
 
     def forward(self, x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).requires_grad_().to(device)
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).requires_grad_().to(device)
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
-        out.to(device)
+        out = out.to(device)
+        out = self.drop(out)
         return self.decoder(out)
 

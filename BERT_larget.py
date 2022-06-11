@@ -35,11 +35,11 @@ class MyBertModel():
         self.myPath = myPath
         self.bert = bert
 
-    def __call__(self, filename, tokenizer, mask=False):
-        self.forward(filename, tokenizer, mask)
+    def __call__(self, filename, tokenizer, pathVal, mask=False):
+        self.forward(filename, tokenizer, pathVal, mask)
 
 
-    def forward(self, filename, tokenizer, mask=False):
+    def forward(self, filename, tokenizer, pathVal, mask=False):
         num=0
         maxlen = 0
         for i in self.myPath:#执行每一个测试集
@@ -55,7 +55,7 @@ class MyBertModel():
         text_id = tokenizer.convert_tokens_to_ids(text)
         text_id = torch.tensor(text_id, dtype=torch.long)
         text_id = text_id.unsqueeze(dim=0)
-        text_id=text_id.to('cpu')
+        text_id=text_id.to('cuda:5')
         output = self.bert(text_id)[0]
         # print(output)
         if ceng:
