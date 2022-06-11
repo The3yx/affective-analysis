@@ -126,8 +126,11 @@ contractions = {
     "you're": "you are",
     "you've": "you have"
 }
-sentiment = pd.read_csv("./dataset/train_data.csv")
+sentiment = pd.read_csv(r"twitter-sentiment-analysis-self-driving-cars\train.csv")
 text_col = sentiment['text'].str.lower()
+sentiment['text'] = sentiment['text'].replace(r'((www\.[^\s]+)|(https?://[^\s]+))', '', regex=True)
+sentiment['text'] = sentiment['text'].replace('@[^\s]+', '', regex=True)
+sentiment['text'] = sentiment['text'].replace('@ [^\s]+', '', regex=True)
 text_col = text_col.replace(r'#([^\s]+)', r'\1', regex=True)
 text_col = text_col.replace('[\s]+', ' ', regex=True)
 text_col = text_col.replace(r'\w*\d\w*', '', regex=True)
@@ -146,4 +149,4 @@ for num in range(len(text_col)):
     ls[num]['sentiment'] = sentiment['sentiment'][num]
     ls[num]['text'] = text_col[num]
 ls = pd.DataFrame(ls)
-ls.to_csv('./dataset/train_pre.csv', index=False)
+ls.to_csv('./dataset/clean_ori_data.csv', index=False)
