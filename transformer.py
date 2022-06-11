@@ -3,9 +3,114 @@ import pandas as pd
 import torch
 from torch import nn
 import numpy as np
+import data
 
+input_dim = 1024
+hidden_dim = 30
+num_layers = 1
+output_dim = 5
+batch_size=64
+lr=5e-3
+maxlen=10
+trainPath="textTrainData"
+valPath="textValData"
+myPath=['./dataset/train_split.csv']
+valCsvPath='./dataset/eval_split.csv'
+logPath="./bertLog"
+ceng=False
+mask=False
 
+trainSentiment=[]
+for i in myPath:
+    tempSentiment=getSentiment(i)
+    if trainSentiment==[]:
+        trainSentiment=tempSentiment
+    else:
+        trainSentiment+=tempSentiment
+valSentiment=getSentiment(valCsvPath)
+if mask:
+    trainData=MyDatasetmask(trainPath,trainSentiment,maxlen)
+    testData=MyDatasetmask(valPath,valSentiment,maxlen)
+else:
+    trainData=MyDataset(trainPath,trainSentiment)
+    testData=MyDataset(valPath,valSentiment)
 
+trainLen=len(trainData)
+testLen=len(testData)
+print(trainLen)
+print(testLen)
+trainDataLoader=DataLoader(trainData,batch_size=batch_size,shuffle=True,drop_last=True)
+testDataLoader=DataLoader(testData,batch_size=batch_size,shuffle=True,drop_last=True)
+
+class MyTransformer(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+        self.transfomer = nn.Transformer(d_model=input_dim)
+        self.fc = nn.Linear(hidden_dim,output_dim)
+        self.activation = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.transfomer(x)
+        x = self.fc(x)
+        x = self.activation(x)
+        return x
+
+model = nn.Transformer(d_model=input_dim)
+theLoss=nn.CrossEntropyLoss()
+optim =torch.optim.Adam(model.parameters(), lr=lr)
+
+epoch = 300
+
+write =SummaryWriter(logPath)
+theStep=0
+for i in range(epoch):
+    if i%30==0:
+        lr = lr*0.7
+        optim = torch.optim.Adam(newModel.parameters(), lr=lr)
+    newLoss=0
+    acc=0
+    theStep+=1
+    newModel.train()
+    for data in trainDataLoader:
+        wav,flag=data
+        flag = flag.reshape(-1)
+        wav=wav.reshape(-1,1,input_dim)
+        wav=wav.to(device)
+        flag=flag.to(device)
+        output=newModel(wav)
+        output = output.reshape(batch_size, -1)
+        loss=theLoss(output,flag)
+        optim.zero_grad()
+        loss.backward()
+        optim.step()
+        acc+=(output.argmax(1)==flag).sum()
+        newLoss+=loss
+        del wav,flag,loss
+
+    print("训练集："+str(i) + "   loss:" + str(newLoss) + "   acc:" + str(acc / trainLen))
+    write.add_scalar("训练loss",newLoss,theStep)
+    write.add_scalar("训练acc",acc/trainLen,theStep)
+    acc=0
+    newLoss=0
+    newModel.eval()
+    for data in testDataLoader:
+        with torch.no_grad():
+            wav,flag=data
+            flag=flag.reshape(-1)
+            wav = wav.reshape(-1, 1, input_dim)
+            flag=torch.tensor(flag)
+            wav=wav.to(device)
+            flag=flag.to(device)
+            output=newModel(wav)
+            output = output.reshape(batch_size, -1)
+            loss=theLoss(output,flag)
+            newLoss+=loss
+            acc+=(output.argmax(1)==flag).sum()
+    print("测试集："+str(i) + "   loss:" + str(newLoss) + "   acc:" + str(acc / testLen))
+    write.add_scalar("loss",newLoss,theStep)
+    write.add_scalar("acc",acc/testLen,theStep)
+write.close()
 
 
 
