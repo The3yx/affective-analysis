@@ -55,7 +55,7 @@ class MyBertModel():
         text_id = tokenizer.convert_tokens_to_ids(text)
         text_id = torch.tensor(text_id, dtype=torch.long)
         text_id = text_id.unsqueeze(dim=0)
-        text_id=text_id.to('cuda:5')
+        text_id=text_id.to('cpu')
         output = self.bert(text_id)[0]
         # print(output)
         if ceng:

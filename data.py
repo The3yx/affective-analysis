@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import pandas as pd
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
@@ -27,7 +28,7 @@ class MyDatasetmask(Dataset):    #继承Datasets
         self.maxLen=maxLen
     def __len__(self):    # 数据集的长度
         return len(self.target)
-    def getMask(self,x):
+    def getMask(self, x, ceng):
         seq = x.shape[0]
         if ceng:
             mask = np.array([True] * seq + [False] * (self.maxLen - seq)).reshape(-1, 1)
@@ -71,7 +72,7 @@ def getSentiment(path):
     sentiment = total['sentiment']
     return sentiment
     
-def getData():
+def getData(myPath, valCsvPath, valPath, trainPath, maxlen, mask=False):
     trainSentiment=[]
     for i in myPath:
         tempSentiment=getSentiment(i)

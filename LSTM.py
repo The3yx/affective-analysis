@@ -8,7 +8,7 @@ import ssl
 import os
 import pandas as pd
 ssl._create_default_https_context = ssl._create_unverified_context
-device = 'cuda:5'
+device = 'cpu'
 input_dim = 1024
 
 

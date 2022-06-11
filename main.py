@@ -18,14 +18,14 @@ def TODO():
 
 def main(args):
     #获取模型等操作
-    device = 'cuda:5'
-    tokenizer = BertTokenizer.from_pretrained('../code/bert-large-uncased', do_lower_case=True)
-    bert = BertModel.from_pretrained('../code/bert-large-uncased')
+    device = 'cpu'
+    tokenizer = BertTokenizer.from_pretrained('./bert-large-uncased', do_lower_case=True)
+    bert = BertModel.from_pretrained('./bert-large-uncased')
     bert.eval()
     bert.to(device)
     #所有训练集路径，测试集路径
-    myPath=['./dataset/ex_train.csv']
-    pathVal='./dataset/ex_test.csv'
+    myPath=["./dataset/clean_ori_data_train_split.csv"]
+    pathVal='./dataset/clean_ori_data_test_split.csv'
     filename="text" #部分文件名
     mask=False #设置是否使用mask，即是否取平均
     layers=False #保留所有层
