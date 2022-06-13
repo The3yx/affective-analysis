@@ -5,8 +5,23 @@ from torch import nn
 import numpy as np
 import data
 
+class MyTransformer(nn.Module):
+    def __init__(self,
+                input_dim,
+                heads=8,
+                num_encoder_layers=4,
+                num_classes=5,
+                dropout=0.5):
+        super().__init__()
+        self.input_dim = input_dim
+        self.num_classes = num_classes
+        self.transformerEncoder = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model=input_dim, nhead = heads, dropout=0.5), num_layers = num_encoder_layers)
+        self.w = nn.Linear(in_features = input_dim, out_features = num_classes)
 
-
+    def forward(self, x):
+        x = self.transformerEncoder(x)
+        x = self.w(x)
+        return x
 
 class PositionalEncoding(nn.Module):
     def __init__(self,

@@ -10,6 +10,7 @@ from torch import nn
 import torch
 from LSTM import LSTM, LSTMmask
 from torch.utils.tensorboard import SummaryWriter 
+from transformer import MyTransformer
 
 
 def TODO():
@@ -52,6 +53,7 @@ def main(args):
         newModel =LSTMmask(input_dim=args.input_dim, hidden_dim=args.hidden_dim, output_dim=args.output_dim, num_layers=args.num_layers)
     else:
         newModel =LSTM(input_dim=args.input_dim, hidden_dim=args.hidden_dim, output_dim=args.output_dim, num_layers=args.num_layers)
+        #newModel = MyTransformer(input_dim = args.input_dim)
 
     # 训练
     newModel=newModel.to(device)
